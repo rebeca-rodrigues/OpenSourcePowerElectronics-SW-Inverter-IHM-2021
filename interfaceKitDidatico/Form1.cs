@@ -16,6 +16,7 @@ namespace interfaceKitDidatico
        
         int contador=0;
         int tamanho_palavra = 10;
+        bool alerta_aberto = false;
         public static byte[] buffer = new byte[10];
         public PaginaInicial()
         {
@@ -25,7 +26,30 @@ namespace interfaceKitDidatico
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            serialPort1.Write(buffer, 0, tamanho_palavra);
+            try
+            {
+                serialPort1.Write(buffer, 0, tamanho_palavra);
+            }
+            catch
+            {
+                if (!alerta_aberto)
+                {
+                    alerta_aberto = true;
+                    DialogResult result = MessageBox.Show("Erro: Porta desconectada. Conecte novamente a placa e clique em 'OK'.");
+                   if (result == DialogResult.OK)
+                    {
+                        try
+                        {
+                            serialPort1.Open();
+                        }
+                        catch
+                        {
+                            MessageBox.Show("Erro: Não foi possível reconectar a placa. Tente novamente.");
+                        }
+                        alerta_aberto = false;
+                    }
+                }
+            }
         }
 
         private void serialPort1_ErrorReceived(object sender, System.IO.Ports.SerialErrorReceivedEventArgs e)
@@ -51,7 +75,7 @@ namespace interfaceKitDidatico
             }
             catch (IOException error)
             {
-                MessageBox.Show(error.ToString());
+                MessageBox.Show("Erro: Seleção de uma porta serial que não está sendo utilizada. Confira se a placa está conectada ao computador, entre no 'Gerenciado de Dispositivos' e veja em 'Portas (COM e LPT)' qual porta está sendo utilizada na comunicação com a placa.");
             } 
         }
 
@@ -67,7 +91,8 @@ namespace interfaceKitDidatico
                 }
                 catch (TimeoutException error)
                 {
-                    MessageBox.Show(error.ToString());
+                    MessageBox.Show("Erro: Seleção da porta serial errada. Confira se a placa está conectada ao computador, entre no 'Gerenciado de Dispositivos' e veja em 'Portas (COM e LPT)' qual porta está sendo utilizada na comunicação com a placa.");
+                    break;
                 }
             }
            
